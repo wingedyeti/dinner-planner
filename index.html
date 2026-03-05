@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dinner Planner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app-header panel">
+      <div>
+        <h1>Dinner Planner</h1>
+        <p>Track meal ideas and restaurants in one responsive app.</p>
+      </div>
+      <div class="header-actions">
+        <button id="open-settings" class="btn btn-secondary" type="button">Settings</button>
+        <button id="export-data" class="btn btn-secondary" type="button">Export</button>
+        <button id="import-data" class="btn btn-secondary" type="button">Import</button>
+        <input id="import-file" type="file" accept=".json,application/json" hidden>
+      </div>
+    </header>
+    <nav class="tabs panel" aria-label="Sections">
+      <button class="tab-btn active" data-tab="meals" type="button">Meals</button>
+      <button class="tab-btn" data-tab="restaurants" type="button">Restaurants</button>
+    </nav>
+    <section id="meals-section" class="tab-section active panel" aria-labelledby="meals-heading">
+      <div class="section-title-row">
+        <h2 id="meals-heading">Meal Ideas</h2>
+        <button id="add-meal" class="btn btn-primary" type="button">+ Add Meal</button>
+      </div>
+      <div class="controls-grid">
+        <label class="control">
+          <span>Search</span>
+          <input id="meal-search" type="search" placeholder="Search name, cuisine, notes, method">
+        </label>
+        <label class="control">
+          <span>Cooking method</span>
+          <select id="meal-method-filter">
+            <option value="all">All cooking methods</option>
+          </select>
+        </label>
+        <label class="control">
+          <span>Cuisine</span>
+          <input id="meal-cuisine-filter" type="search" placeholder="e.g. Mexican">
+        </label>
+        <label class="control">
+          <span>Sort</span>
+          <select id="meal-sort">
+            <option value="newest">Newest</option>
+            <option value="name">Name</option>
+            <option value="method">Cooking method</option>
+            <option value="cuisine">Cuisine</option>
+          </select>
+        </label>
+      </div>
+      <fieldset class="protein-filter">
+        <legend>Quick exclude (uncheck to hide meals containing)</legend>
+        <label><input class="protein-tag" type="checkbox" value="chicken" checked>Chicken</label>
+        <label><input class="protein-tag" type="checkbox" value="beef" checked>Beef</label>
+        <label><input class="protein-tag" type="checkbox" value="pork" checked>Pork</label>
+        <label><input class="protein-tag" type="checkbox" value="fish" checked>Fish</label>
+        <label><input class="protein-tag" type="checkbox" value="shrimp" checked>Shrimp</label>
+      </fieldset>
+      <div id="meals-list" class="card-grid"></div>
+    </section>
+    <section id="restaurants-section" class="tab-section panel" aria-labelledby="restaurants-heading">
+      <div class="section-title-row">
+        <h2 id="restaurants-heading">Restaurants</h2>
+        <button id="add-restaurant" class="btn btn-primary" type="button">+ Add Restaurant</button>
+      </div>
+      <div class="controls-grid">
+        <label class="control">
+          <span>Search</span>
+          <input id="restaurant-search" type="search" placeholder="Search name, type, cuisine, location">
+        </label>
+        <label class="control">
+          <span>Type</span>
+          <select id="restaurant-type-filter">
+            <option value="all">All types</option>
+            <option value="Sit-down">Sit-down</option>
+            <option value="Fast Food">Fast Food</option>
+            <option value="Carry Out">Carry Out</option>
+          </select>
+        </label>
+        <label class="control">
+          <span>Price</span>
+          <select id="restaurant-price-filter">
+            <option value="all">All prices</option>
+            <option value="$">$</option>
+            <option value="$$">$$</option>
+            <option value="$$$">$$$</option>
+            <option value="$$$$">$$$$</option>
+          </select>
+        </label>
+        <label class="control">
+          <span>Cuisine</span>
+          <input id="restaurant-cuisine-filter" type="search" placeholder="e.g. Italian">
+        </label>
+        <label class="control">
+          <span>Sort</span>
+          <select id="restaurant-sort">
+            <option value="newest">Newest</option>
+            <option value="name">Name</option>
+            <option value="rating">Rating</option>
+            <option value="type">Type</option>
+          </select>
+        </label>
+      </div>
+      <div id="restaurants-list" class="card-grid"></div>
+    </section>
+  </div>
+
+  <div id="meal-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="meal-modal-title">
+    <div class="modal-content">
+      <h3 id="meal-modal-title">Add Meal</h3>
+      <form id="meal-form" class="form-grid">
+        <input type="hidden" name="id" id="meal-id">
+        <label class="control">
+          <span>Name *</span>
+          <input type="text" name="name" id="meal-name" required maxlength="80">
+        </label>
+        <label class="control">
+          <span>Cooking method *</span>
+          <input type="text" name="cookingMethod" id="meal-cooking-method" list="cooking-methods" required maxlength="40" placeholder="e.g. Grill">
+        </label>
+        <label class="control">
+          <span>Cuisine type</span>
+          <input type="text" name="cuisine" id="meal-cuisine" maxlength="50" placeholder="e.g. Mexican">
+        </label>
+        <label class="control control-full">
+          <span>Notes</span>
+          <textarea name="notes" id="meal-notes" rows="3" maxlength="500" placeholder="Optional notes"></textarea>
+        </label>
+        <div class="form-actions control-full">
+          <button type="button" class="btn btn-secondary" data-close-modal="meal-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Meal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="restaurant-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="restaurant-modal-title">
+    <div class="modal-content">
+      <h3 id="restaurant-modal-title">Add Restaurant</h3>
+      <form id="restaurant-form" class="form-grid">
+        <input type="hidden" name="id" id="restaurant-id">
+        <label class="control">
+          <span>Name *</span>
+          <input type="text" name="name" id="restaurant-name" required maxlength="80">
+        </label>
+        <label class="control">
+          <span>Type *</span>
+          <select name="type" id="restaurant-type" required>
+            <option value="Sit-down">Sit-down</option>
+            <option value="Fast Food">Fast Food</option>
+            <option value="Carry Out">Carry Out</option>
+          </select>
+        </label>
+        <label class="control">
+          <span>Cuisine type</span>
+          <input type="text" name="cuisine" id="restaurant-cuisine" maxlength="50" placeholder="e.g. American">
+        </label>
+        <label class="control">
+          <span>Price range</span>
+          <select name="priceRange" id="restaurant-price">
+            <option value="">Not set</option>
+            <option value="$">$</option>
+            <option value="$$">$$</option>
+            <option value="$$$">$$$</option>
+            <option value="$$$$">$$$$</option>
+          </select>
+        </label>
+        <label class="control">
+          <span>Location</span>
+          <input type="text" name="location" id="restaurant-location" maxlength="100" placeholder="City or area">
+        </label>
+        <label class="control">
+          <span>Rating</span>
+          <select name="rating" id="restaurant-rating">
+            <option value="0">Not rated</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </label>
+        <label class="control control-full">
+          <span>Notes</span>
+          <textarea name="notes" id="restaurant-notes" rows="3" maxlength="500" placeholder="Optional notes"></textarea>
+        </label>
+        <div class="form-actions control-full">
+          <button type="button" class="btn btn-secondary" data-close-modal="restaurant-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Restaurant</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="modal-content">
+      <h3 id="settings-title">Settings & Google Sheets Sync</h3>
+      <form id="settings-form" class="form-grid">
+        <label class="control control-full">
+          <span>Google Apps Script Web App URL</span>
+          <input type="url" id="sheet-url" placeholder="https://script.google.com/macros/s/.../exec">
+          <small>Paste your deployed Apps Script URL from the Google Sheet.</small>
+        </label>
+        <div class="form-actions control-full form-actions-wrap">
+          <button type="button" class="btn btn-secondary" data-close-modal="settings-modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+          <button type="button" class="btn btn-secondary" id="pull-sheets">Pull from Sheets</button>
+          <button type="button" class="btn btn-secondary" id="push-sheets">Push to Sheets</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" aria-live="polite"></div>
+
+  <datalist id="cooking-methods">
+    <option value="Oven"></option>
+    <option value="Stovetop"></option>
+    <option value="Grill"></option>
+    <option value="Blackstone"></option>
+    <option value="Slow Cooker"></option>
+    <option value="Air Fryer"></option>
+    <option value="Instant Pot"></option>
+    <option value="Soup"></option>
+    <option value="No Cook"></option>
+  </datalist>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
