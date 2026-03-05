@@ -346,6 +346,41 @@ textarea {
   z-index: 1200;
 }
 
+.section-title-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.picker-content {
+  text-align: center;
+}
+
+.picker-content h3 {
+  font-size: 1.1rem;
+  color: var(--subtext);
+}
+
+.picker-name {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0.8rem 0 0.5rem;
+  color: var(--text);
+}
+
+.picker-details {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.picker-notes {
+  color: var(--subtext);
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
+
 .hidden {
   display: none !important;
 }

@@ -93,6 +93,12 @@
     els.importFileInput = document.getElementById("import-file");
 
     els.toast = document.getElementById("toast");
+
+    els.randomMealBtn = document.getElementById("random-meal");
+    els.randomRestaurantBtn = document.getElementById("random-restaurant");
+    els.pickerModal = document.getElementById("picker-modal");
+    els.pickerResult = document.getElementById("picker-result");
+    els.pickAgainBtn = document.getElementById("pick-again");
   }
 
   function bindEvents() {
@@ -131,7 +137,7 @@
       });
     });
 
-    [els.mealModal, els.restaurantModal, els.settingsModal].forEach((modal) => {
+    [els.mealModal, els.restaurantModal, els.settingsModal, els.pickerModal].forEach((modal) => {
       modal.addEventListener("click", (event) => {
         if (event.target === modal) {
           closeModal(modal);
@@ -144,6 +150,7 @@
         closeModal(els.mealModal);
         closeModal(els.restaurantModal);
         closeModal(els.settingsModal);
+        closeModal(els.pickerModal);
       }
     });
 
@@ -155,6 +162,10 @@
     els.exportBtn.addEventListener("click", exportData);
     els.importBtn.addEventListener("click", () => els.importFileInput.click());
     els.importFileInput.addEventListener("change", handleImportData);
+
+    els.randomMealBtn.addEventListener("click", () => pickRandom("meals"));
+    els.randomRestaurantBtn.addEventListener("click", () => pickRandom("restaurants"));
+    els.pickAgainBtn.addEventListener("click", () => pickRandom(state.lastPickType || state.activeTab));
   }
 
   function switchTab(tabName) {
@@ -789,6 +800,45 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#39;");
+  }
+
+  function pickRandom(type) {
+    state.lastPickType = type;
+    const items = type === "restaurants" ? getFilteredRestaurants() : getFilteredMeals();
+
+    if (!items.length) {
+      showToast("Nothing to pick from — adjust your filters.", true);
+      return;
+    }
+
+    const pick = items[Math.floor(Math.random() * items.length)];
+    let html = "";
+
+    if (type === "restaurants") {
+      html = `
+        <p class="picker-name">${escapeHtml(pick.name)}</p>
+        <div class="picker-details">
+          ${pick.type ? `<span class="badge">${escapeHtml(pick.type)}</span>` : ""}
+          ${pick.cuisine ? `<span class="badge">${escapeHtml(pick.cuisine)}</span>` : ""}
+          ${pick.priceRange ? `<span class="badge">${escapeHtml(pick.priceRange)}</span>` : ""}
+        </div>
+        ${pick.rating ? `<div class="stars">${renderStars(pick.rating)}</div>` : ""}
+        ${pick.location ? `<p class="picker-notes">📍 ${escapeHtml(pick.location)}</p>` : ""}
+        ${pick.notes ? `<p class="picker-notes">${escapeHtml(pick.notes)}</p>` : ""}
+      `;
+    } else {
+      html = `
+        <p class="picker-name">${escapeHtml(pick.name)}</p>
+        <div class="picker-details">
+          ${pick.cookingMethod ? `<span class="badge">${escapeHtml(pick.cookingMethod)}</span>` : ""}
+          ${pick.cuisine ? `<span class="badge">${escapeHtml(pick.cuisine)}</span>` : ""}
+        </div>
+        ${pick.notes ? `<p class="picker-notes">${escapeHtml(pick.notes)}</p>` : ""}
+      `;
+    }
+
+    els.pickerResult.innerHTML = html;
+    openModal(els.pickerModal);
   }
 
   function showToast(message, isError = false) {

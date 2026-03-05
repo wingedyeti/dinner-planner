@@ -27,7 +27,10 @@
     <section id="meals-section" class="tab-section active panel" aria-labelledby="meals-heading">
       <div class="section-title-row">
         <h2 id="meals-heading">Meal Ideas</h2>
-        <button id="add-meal" class="btn btn-primary" type="button">+ Add Meal</button>
+        <div class="section-title-actions">
+          <button id="random-meal" class="btn btn-secondary" type="button">🎲 Pick for Me</button>
+          <button id="add-meal" class="btn btn-primary" type="button">+ Add Meal</button>
+        </div>
       </div>
       <div class="controls-grid">
         <label class="control">
@@ -67,7 +70,10 @@
     <section id="restaurants-section" class="tab-section panel" aria-labelledby="restaurants-heading">
       <div class="section-title-row">
         <h2 id="restaurants-heading">Restaurants</h2>
-        <button id="add-restaurant" class="btn btn-primary" type="button">+ Add Restaurant</button>
+        <div class="section-title-actions">
+          <button id="random-restaurant" class="btn btn-secondary" type="button">🎲 Pick for Me</button>
+          <button id="add-restaurant" class="btn btn-primary" type="button">+ Add Restaurant</button>
+        </div>
       </div>
       <div class="controls-grid">
         <label class="control">
@@ -214,6 +220,17 @@
           <button type="button" class="btn btn-secondary" id="push-sheets">Push to Sheets</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div id="picker-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+    <div class="modal-content picker-content">
+      <h3 id="picker-title">Tonight's Pick</h3>
+      <div id="picker-result"></div>
+      <div class="form-actions" style="margin-top:1rem">
+        <button type="button" class="btn btn-secondary" data-close-modal="picker-modal">Close</button>
+        <button type="button" class="btn btn-primary" id="pick-again">🎲 Pick Again</button>
+      </div>
     </div>
   </div>
 
