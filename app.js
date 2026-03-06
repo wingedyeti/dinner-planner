@@ -3,6 +3,9 @@
 
   const STORAGE_KEY = "dinnerPlanner.data.v1";
   const SETTINGS_KEY = "dinnerPlanner.settings.v1";
+  const TAGS_KEY = "dinnerPlanner.excludeTags.v1";
+
+  const DEFAULT_TAGS = ["chicken", "beef", "pork", "turkey", "fish", "shrimp", "veggie"];
 
   const KNOWN_COOKING_METHODS = [
     "Oven",
@@ -31,6 +34,7 @@
     mapElements();
     hydrateSettingsForm();
     bindEvents();
+    renderExcludeTags();
     populateMealMethodFilter();
     renderMeals();
     renderRestaurants();
@@ -45,7 +49,13 @@
     els.mealMethodFilter = document.getElementById("meal-method-filter");
     els.mealCuisineFilter = document.getElementById("meal-cuisine-filter");
     els.mealSort = document.getElementById("meal-sort");
-    els.proteinChecks = Array.from(document.querySelectorAll(".protein-tag"));
+    els.excludeTagsContainer = document.getElementById("exclude-tags");
+    els.newTagInput = document.getElementById("new-tag-input");
+    els.addTagBtn = document.getElementById("add-tag-btn");
+    els.tagEditRow = document.getElementById("tag-edit-row");
+    els.editTagsBtn = document.getElementById("edit-tags-btn");
+    els.selectAllTags = document.getElementById("select-all-tags");
+    els.proteinFilter = document.querySelector(".protein-filter");
     els.mealsList = document.getElementById("meals-list");
 
     els.restaurantSearch = document.getElementById("restaurant-search");
@@ -110,7 +120,15 @@
     els.mealMethodFilter.addEventListener("change", renderMeals);
     els.mealCuisineFilter.addEventListener("input", renderMeals);
     els.mealSort.addEventListener("change", renderMeals);
-    els.proteinChecks.forEach((checkbox) => checkbox.addEventListener("change", renderMeals));
+
+    els.excludeTagsContainer.addEventListener("change", handleTagToggle);
+    els.excludeTagsContainer.addEventListener("click", handleTagRemove);
+    els.addTagBtn.addEventListener("click", addNewTag);
+    els.newTagInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") { event.preventDefault(); addNewTag(); }
+    });
+    els.editTagsBtn.addEventListener("click", toggleEditTags);
+    els.selectAllTags.addEventListener("change", toggleAllTags);
 
     els.restaurantSearch.addEventListener("input", renderRestaurants);
     els.restaurantTypeFilter.addEventListener("change", renderRestaurants);
@@ -442,7 +460,7 @@
     const searchTerm = normalizeText(els.mealSearch.value);
     const methodFilter = els.mealMethodFilter.value;
     const cuisineFilter = normalizeText(els.mealCuisineFilter.value);
-    const excludedTags = els.proteinChecks
+    const excludedTags = Array.from(els.excludeTagsContainer.querySelectorAll(".protein-tag"))
       .filter((checkbox) => !checkbox.checked)
       .map((checkbox) => normalizeText(checkbox.value));
     const sortBy = els.mealSort.value || "newest";
@@ -720,6 +738,95 @@
 
   function saveSettings() {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+  }
+
+  function loadExcludeTags() {
+    try {
+      const raw = localStorage.getItem(TAGS_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function saveExcludeTags() {
+    const tags = Array.from(els.excludeTagsContainer.querySelectorAll(".protein-tag")).map((cb) => ({
+      value: cb.value,
+      checked: cb.checked
+    }));
+    localStorage.setItem(TAGS_KEY, JSON.stringify(tags));
+  }
+
+  function renderExcludeTags() {
+    const saved = loadExcludeTags();
+    const tags = saved || DEFAULT_TAGS.map((t) => ({ value: t, checked: true }));
+    els.excludeTagsContainer.innerHTML = tags.map((tag) => {
+      const label = escapeHtml(tag.value.charAt(0).toUpperCase() + tag.value.slice(1));
+      const val = escapeHtml(tag.value);
+      return `<label><input class="protein-tag" type="checkbox" value="${val}"${tag.checked ? " checked" : ""}>${label}<button type="button" class="tag-remove" data-tag="${val}" title="Remove tag">&times;</button></label>`;
+    }).join("");
+  }
+
+  function handleTagToggle() {
+    saveExcludeTags();
+    updateSelectAllState();
+    renderMeals();
+  }
+
+  function handleTagRemove(event) {
+    const btn = event.target.closest(".tag-remove");
+    if (!btn) return;
+    const tagValue = btn.dataset.tag;
+    const confirmed = window.confirm(`Remove the "${tagValue}" exclude tag?`);
+    if (!confirmed) return;
+    const label = btn.closest("label");
+    if (label) label.remove();
+    saveExcludeTags();
+    renderMeals();
+  }
+
+  function addNewTag() {
+    const raw = toCleanString(els.newTagInput.value).toLowerCase();
+    if (!raw) return;
+    const existing = Array.from(els.excludeTagsContainer.querySelectorAll(".protein-tag")).map((cb) => cb.value);
+    if (existing.includes(raw)) {
+      showToast("That tag already exists.", true);
+      return;
+    }
+    const label = escapeHtml(raw.charAt(0).toUpperCase() + raw.slice(1));
+    const val = escapeHtml(raw);
+    els.excludeTagsContainer.insertAdjacentHTML(
+      "beforeend",
+      `<label><input class="protein-tag" type="checkbox" value="${val}" checked>${label}<button type="button" class="tag-remove" data-tag="${val}" title="Remove tag">&times;</button></label>`
+    );
+    els.newTagInput.value = "";
+    saveExcludeTags();
+    updateSelectAllState();
+    showToast(`"${label}" tag added.`);
+  }
+
+  function toggleEditTags() {
+    const editing = els.proteinFilter.classList.toggle("editing");
+    els.tagEditRow.classList.toggle("hidden", !editing);
+    els.editTagsBtn.textContent = editing ? "Done" : "Edit Tags";
+  }
+
+  function toggleAllTags() {
+    const checked = els.selectAllTags.checked;
+    Array.from(els.excludeTagsContainer.querySelectorAll(".protein-tag")).forEach((cb) => {
+      cb.checked = checked;
+    });
+    saveExcludeTags();
+    renderMeals();
+  }
+
+  function updateSelectAllState() {
+    const all = Array.from(els.excludeTagsContainer.querySelectorAll(".protein-tag"));
+    const allChecked = all.length > 0 && all.every((cb) => cb.checked);
+    els.selectAllTags.checked = allChecked;
   }
 
   function normalizeMeal(rawMeal) {

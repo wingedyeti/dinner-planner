@@ -59,11 +59,15 @@
       </div>
       <fieldset class="protein-filter">
         <legend>Quick exclude (uncheck to hide meals containing)</legend>
-        <label><input class="protein-tag" type="checkbox" value="chicken" checked>Chicken</label>
-        <label><input class="protein-tag" type="checkbox" value="beef" checked>Beef</label>
-        <label><input class="protein-tag" type="checkbox" value="pork" checked>Pork</label>
-        <label><input class="protein-tag" type="checkbox" value="fish" checked>Fish</label>
-        <label><input class="protein-tag" type="checkbox" value="shrimp" checked>Shrimp</label>
+        <div class="tag-controls">
+          <label class="select-all-label"><input id="select-all-tags" type="checkbox" checked> All</label>
+          <button id="edit-tags-btn" class="btn btn-secondary btn-xs" type="button">Edit Tags</button>
+        </div>
+        <div id="exclude-tags"></div>
+        <div id="tag-edit-row" class="add-tag-row hidden">
+          <input id="new-tag-input" type="text" maxlength="30" placeholder="Add tag...">
+          <button id="add-tag-btn" class="btn btn-secondary btn-xs" type="button">+ Add</button>
+        </div>
       </fieldset>
       <div id="meals-list" class="card-grid"></div>
     </section>

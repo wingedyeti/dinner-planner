@@ -157,6 +157,13 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 0.7rem 1rem;
+  align-items: center;
+}
+
+#exclude-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
 }
 
 .protein-filter legend {
@@ -170,6 +177,62 @@ textarea {
   align-items: center;
   gap: 0.3rem;
   font-size: 0.92rem;
+}
+
+.tag-controls {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  width: 100%;
+}
+
+.select-all-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--subtext);
+}
+
+.btn-xs {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.78rem;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--danger);
+  font-size: 0.85rem;
+  padding: 0 0.2rem;
+  line-height: 1;
+  display: none;
+}
+
+.protein-filter.editing .tag-remove {
+  display: inline;
+}
+
+.add-tag-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  width: 100%;
+}
+
+.add-tag-row input {
+  width: 110px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.add-tag-row .btn {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
 }
 
 .card-grid {
